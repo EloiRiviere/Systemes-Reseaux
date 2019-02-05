@@ -1,0 +1,51 @@
+#Compilations
+export CC = gcc
+export CFLAGS = -Wall
+export LDFLAGS =
+SRC = src/
+
+.PHONY: all doc clean
+
+all: warcraft editeur
+	make -C $(SRC)$@
+
+#Compilations
+%.o: %.c %.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+#Editions de lien
+%: %.o
+	$(CC) $^ -o $@
+
+#Dependences editions de liens
+warcraft: warcraft.o video.o perso.o
+editeur: editeur.o perso.o video.o
+
+#Dependances
+depends:
+	makedepend $(SRC)*.c
+
+
+#Clean
+clean:
+	rm -f $(SRC)*.o warcraft editeur
+
+# DO NOT DELETE
+
+src/editeur.o: /usr/include/stdio.h /usr/include/features.h
+src/editeur.o: /usr/include/stdc-predef.h /usr/include/libio.h
+src/editeur.o: /usr/include/_G_config.h /usr/include/wchar.h
+src/editeur.o: /usr/include/unistd.h /usr/include/getopt.h src/perso.h
+src/editeur.o: src/video.h src/editeur.h
+src/perso.o: /usr/include/stdio.h /usr/include/features.h
+src/perso.o: /usr/include/stdc-predef.h /usr/include/libio.h
+src/perso.o: /usr/include/_G_config.h /usr/include/wchar.h src/perso.h
+src/perso.o: src/video.h
+src/video.o: /usr/include/stdio.h /usr/include/features.h
+src/video.o: /usr/include/stdc-predef.h /usr/include/libio.h
+src/video.o: /usr/include/_G_config.h /usr/include/wchar.h src/video.h
+src/warcraft.o: /usr/include/stdio.h /usr/include/features.h
+src/warcraft.o: /usr/include/stdc-predef.h /usr/include/libio.h
+src/warcraft.o: /usr/include/_G_config.h /usr/include/wchar.h
+src/warcraft.o: /usr/include/unistd.h /usr/include/getopt.h src/video.h
+src/warcraft.o: src/perso.h src/warcraft.h

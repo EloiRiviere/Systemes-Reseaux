@@ -1,0 +1,522 @@
+TP1:
+
+Compilation manuelle:
+
+Donnez les lignes de commandes permettant de générer l'exécutable editeur:
+
+	gcc -Wall video.c perso.c editeur.c -o Editeur
+
+Donnez les lignes de commandes permettant de générer l'exécutable warcraft. Une erreur va survenir ! Expliquez là et proposez une solution.
+
+	gcc -Wall warcraft.c video.c perso.c -o Warcraft
+
+	In file included from perso.h:4:0,
+	                 from warcraft.c:5:
+	video.h:4:3: error: conflicting types for ‘Video’
+	 } Video;
+	   ^~~~~
+	In file included from warcraft.c:4:0:
+	video.h:4:3: note: previous declaration of ‘Video’ was here
+	 } Video;
+
+-> Edition de video.h
+
+	On ajoute au début du fichier:
+
+	#ifndef VIDEO_H
+	#define VIDEO_H
+
+	On ajoute également en fin de fichier:
+
+	#endif
+
+	On relance la commande:
+
+	gcc -Wall warcraft.c video.c perso.c -o Warcraft
+
+	-> le fichier est généré
+
+
+Premier Makefile:
+
+Écrivez et testez votre Makefile (pas de variable, pas de raccourci, pas de règles générique). Pour testez votre Makefile vous pourrez, plutôt que de modifiez les fichiers sources, simplement changer leur date de modification à l'aide de la commande touch fichier.
+
+-> Création de fichier Makefile:
+
+	#Compilations
+	all: Warcraft Editeur
+	perso.o: perso.c perso.h video.h
+		gcc -Wall -c perso.c -o perso.o
+	video.o: video.c video.h
+		gcc -Wall -c video.c -o video.o
+	warcraft.o: warcraft.c warcraft.h video.h perso.h
+		gcc -Wall -c warcraft.c -o warcraft.o
+	editeur.o: editeur.c editeur.h perso.h video.h
+		gcc -Wall -c editeur.c -o editeur.o
+
+	#Editions de lien
+	Warcraft: warcraft.o video.o perso.o
+		gcc warcraft.o video.o perso.o -o Warcraft
+	Editeur: editeur.o perso.o video.o
+		gcc editeur.o video.o perso.o -o Editeur
+
+Ajoutez une cible clean effacant tous les fichiers regénérables.
+
+-> ajout à la fin du fichier Makefile:
+
+	#Clean
+	clean:
+		rm -f *.o Warcraft Editeur
+
+
+-> test:
+
+	elriviere2@iutclinfb2004l:~/Documents/P3/systeme/tp1/warcraft$ make
+	gcc -Wall -c warcraft.c -o warcraft.o
+	gcc -Wall -c video.c -o video.o
+	gcc -Wall -c perso.c -o perso.o
+	gcc warcraft.o video.o perso.o -o Warcraft
+	gcc -Wall -c editeur.c -o editeur.o
+	gcc editeur.o video.o perso.o -o Editeur
+	elriviere2@iutclinfb2004l:~/Documents/P3/systeme/tp1/warcraft$ make clean
+	rm -f *.o Warcraft Editeur
+
+
+Second Makefile:
+
+Intégrez maintenant la définition des variables suivantes :
+
+CC : le compilateur à utiliser
+CFLAGS : les options de compilation
+LDFLAGS : les options d'édition de lien (vide pour l'instant).
+
+-> Création de fichier Makefile:
+
+	#Compilations
+	CC = gcc
+	CFLAGS = -Wall
+	LDFLAGS = ""
+	all: Warcraft Editeur
+	perso.o: perso.c perso.h video.h
+		$(CC) $(CFLAGS) -c perso.c -o perso.o
+	video.o: video.c video.h
+		$(CC) $(CFLAGS) -c video.c -o video.o
+	warcraft.o: warcraft.c warcraft.h video.h perso.h
+		$(CC) $(CFLAGS) -c warcraft.c -o warcraft.o
+	editeur.o: editeur.c editeur.h perso.h video.h
+		$(CC) $(CFLAGS) -c editeur.c -o editeur.o
+
+	#Editions de lien
+	Warcraft: warcraft.o video.o perso.o
+		$(CC) warcraft.o video.o perso.o -o Warcraft
+	Editeur: editeur.o perso.o video.o
+		$(CC) editeur.o video.o perso.o -o Editeur
+
+	#Clean
+	clean:
+		rm -f *.o Warcraft Editeur
+
+-> test:
+
+	elriviere2@iutclinfb2004l:~/Documents/P3/systeme/tp1/warcraft$ make
+	gcc -Wall -c warcraft.c -o warcraft.o
+	gcc -Wall -c video.c -o video.o
+	gcc -Wall -c perso.c -o perso.o
+	gcc warcraft.o video.o perso.o -o Warcraft
+	gcc -Wall -c editeur.c -o editeur.o
+	gcc editeur.o video.o perso.o -o Editeur
+	elriviere2@iutclinfb2004l:~/Documents/P3/systeme/tp1/warcraft$ make clean
+	rm -f *.o Warcraft Editeur
+
+
+Troisième Makefile:
+
+Intégrez maintenant le maximum de raccourcis ($@, $<, $^, ...).
+
+	#Compilations
+	CC = gcc
+	CFLAGS = -Wall
+	LDFLAGS = ""
+	all: Warcraft Editeur
+	perso.o: perso.c perso.h video.h
+		$(CC) $(CFLAGS) -c $< -o $@
+	video.o: video.c video.h
+		$(CC) $(CFLAGS) -c $< -o $@
+	warcraft.o: warcraft.c warcraft.h video.h perso.h
+		$(CC) $(CFLAGS) -c $< -o $@
+	editeur.o: editeur.c editeur.h perso.h video.h
+		$(CC) $(CFLAGS) -c $< -o $@
+
+	#Editions de lien
+	Warcraft: warcraft.o video.o perso.o
+		$(CC) $^ -o $@
+	Editeur: editeur.o perso.o video.o
+		$(CC) $^ -o $@
+
+	#Clean
+	clean:
+		rm -f *.o Warcraft Editeur
+
+-> test:
+
+	elriviere2@iutclinfb2004l:~/Documents/P3/systeme/tp1/warcraft$ make
+	gcc -Wall -c warcraft.c -o warcraft.o
+	gcc -Wall -c video.c -o video.o
+	gcc -Wall -c perso.c -o perso.o
+	gcc warcraft.o video.o perso.o -o Warcraft
+	gcc -Wall -c editeur.c -o editeur.o
+	gcc editeur.o video.o perso.o -o Editeur
+	elriviere2@iutclinfb2004l:~/Documents/P3/systeme/tp1/warcraft$ make clean
+	rm -f *.o Warcraft Editeur
+
+
+
+Quatrième Makefile:
+
+Définissez maintenant les règles génériques (Par souci pratique à partide maintenant les éditions de liens n'auront plus de majuscule au début)
+
+	#Compilations
+	CC = gcc
+	CFLAGS = -Wall
+	LDFLAGS = ""
+
+	all: warcraft editeur
+
+	#Compilations
+	%.o: %.c %.h
+		$(CC) $(CFLAGS) -c $< -o $@
+
+	#Editions de lien
+	%: %.o
+		$(CC) $^ -o $@
+
+	perso.o: perso.c perso.h video.h
+	video.o: video.c video.h
+	warcraft.o: warcraft.c warcraft.h video.h perso.h
+	editeur.o: editeur.c editeur.h perso.h video.h
+	warcraft: warcraft.o video.o perso.o
+	editeur: editeur.o perso.o video.o
+
+	#Clean
+	clean:
+		rm -f *.o warcraft editeur
+
+-> test:
+
+	elriviere2@iutclinfb2004l:~/Documents/P3/systeme/tp1/warcraft$ make
+	gcc -Wall -c warcraft.c -o warcraft.o
+	gcc -Wall -c video.c -o video.o
+	gcc -Wall -c perso.c -o perso.o
+	gcc warcraft.o video.o perso.o -o warcraft
+	gcc -Wall -c editeur.c -o editeur.o
+	gcc editeur.o perso.o video.o -o editeur
+	elriviere2@iutclinfb2004l:~/Documents/P3/systeme/tp1/warcraft$ make clean
+	rm -f *.o warcraft editeur
+
+
+Cinquième Makefile:
+
+Supprimez de votre Makefile les lignes cible : dépendances correspondant à la génération des modules objets (.o) et demander à makedepend de vous les calculer automatiquement via la commande :
+
+	#Compilations
+	CC = gcc
+	CFLAGS = -Wall
+	LDFLAGS = ""
+
+	all: warcraft editeur
+
+	#Compilations
+	%.o: %.c %.h
+		$(CC) $(CFLAGS) -c $< -o $@
+
+	#Editions de lien
+	%: %.o
+		$(CC) $^ -o $@
+
+	#Dependences editions de liens
+	warcraft: warcraft.o video.o perso.o
+	editeur: editeur.o perso.o video.o
+
+	#Dependances
+	depend:
+		makedepend -Y *.c
+
+	#Clean
+	clean:
+		rm -f *.o warcraft editeur# DO NOT DELETE
+
+	editeur.o: perso.h video.h editeur.h
+	perso.o: perso.h video.h
+	video.o: video.h
+	warcraft.o: video.h perso.h warcraft.h
+
+
+-> test:
+
+	elriviere2@iutclinfb2004l:~/Documents/P3/systeme/tp1/warcraft$ make depend
+	makedepend -Y *.c
+	makedepend: warning:  editeur.c, line 1: cannot find include file "stdio.h"
+	makedepend: warning:  editeur.c, line 2: cannot find include file "unistd.h"
+	makedepend: warning:  perso.c, line 1: cannot find include file "stdio.h"
+	makedepend: warning:  video.c, line 1: cannot find include file "stdio.h"
+	makedepend: warning:  warcraft.c, line 1: cannot find include file "stdio.h"
+	makedepend: warning:  warcraft.c, line 2: cannot find include file "unistd.h"
+	elriviere2@iutclinfb2004l:~/Documents/P3/systeme/tp1/warcraft$ make
+	gcc -Wall -c warcraft.c -o warcraft.o
+	gcc -Wall -c video.c -o video.o
+	gcc -Wall -c perso.c -o perso.o
+	gcc warcraft.o video.o perso.o -o warcraft
+	gcc -Wall -c editeur.c -o editeur.o
+	gcc editeur.o perso.o video.o -o editeur
+
+
+Intégrez à votre Makefile une nouvelle cible depends permettant de regénérer les dépendances associées aux modules objets
+
+	#Compilations
+	CC = gcc
+	CFLAGS = -Wall
+	LDFLAGS = ""
+
+	#.PHONY: all doc clean
+
+	all: warcraft editeur
+
+	#Compilations
+	%.o: %.c %.h
+		$(CC) $(CFLAGS) -c $< -o $@
+
+	#Editions de lien
+	%: %.o
+		$(CC) $^ -o $@
+
+	#Dependences editions de liens
+	warcraft: warcraft.o video.o perso.o
+	editeur: editeur.o perso.o video.o
+
+	#Dependances
+	depends:
+		makedepend -Y *.c
+
+
+	#Clean
+	clean:
+		rm -f *.o warcraft editeur
+
+	# DO NOT DELETE
+
+	editeur.o: perso.h video.h editeur.h
+	perso.o: perso.h video.h
+	video.o: video.h
+	warcraft.o: video.h perso.h warcraft.h
+
+
+Un peu de rangement:
+
+En vous inspirant de ce qui est décrit pour la règle all, construisez les autres règles du Makefile de base
+
+	export CC = gcc
+	export CFLAGS = -Wall
+	export LDFLAGS =
+	SRC = src/
+
+	.PHONY: all doc clean
+
+	all:
+		make -C $(SRC) $@
+
+	#Dependances
+	depends:
+		make depends -C $(SRC) $@
+
+	#Clean
+	clean:
+		make clean -C $(SRC) $@
+
+
+Génération des pages de manuel:
+
+Créez un Makefile dans le sous répertoire doc capable de générer la page de manuel compressée lorsque la cible all est précisée et capable de supprimer la page de manuel lorsque la cible clean est précisée.
+
+	all:
+		pod2man --utf8 -r 0.1 -c "Game" -s 6 warcraft.pod > warcraft.6
+
+	clean:
+		rm warcraft.6
+
+Modifiez le Makefile de base pour qu'il appelle le Makefile du répertoire doc lorsque nécessaire.
+
+	export CC = gcc
+	export CFLAGS = -Wall
+	export LDFLAGS =
+	SRC = src/
+	DOC = doc/
+
+	.PHONY: all doc clean
+
+	all:
+		make -C $(SRC) $@
+		make -C $(DOC) $@
+
+	#Dependances
+	depends:
+		make depends -C $(SRC) $@
+
+	#Clean
+	clean:
+		make clean -C $(SRC) $@
+		make clean -C $(DOC) $@
+
+
+Installation:
+
+Écrivez une nouvelle règle install dans les Makefile de vos projets pour permettre l'installation dans les sous répertoires du répertoire $PREFIX.
+L'installation devra utiliser exclusivement l'outil install (regardez particulièrement les options -D et -m).
+
+Makefile:
+
+	export CC = gcc
+	export CFLAGS = -Wall
+	export LDFLAGS =
+	export PREFIX = /tmp/root
+	SRC = src/
+	DOC = doc/
+	ARCHIVE = src.tar.gz
+
+	.PHONY: all doc clean
+
+	all:
+		make -C $(SRC) $@
+		make -C $(DOC) $@
+
+	#Dependances
+	depends:
+		make depends -C $(SRC) $@
+
+	#Clean
+	clean:
+		make clean -C $(SRC) $@
+		make clean -C $(DOC) $@
+
+	#Installation
+	install:
+		make install -C $(SRC) $@
+		make install -C $(DOC) $@
+
+	#Désinstallation
+	uninstall:
+		make uninstall -C $(SRC) $@
+		make uninstall -C $(DOC) $@
+
+
+src/Makefile:
+
+	DIR = /usr/bin/
+	.PHONY: all doc clean
+
+	all: warcraft editeur
+
+	#Compilations
+	%.o: %.c %.h
+		$(CC) $(CFLAGS) -c $< -o $@
+
+	#Editions de lien
+	%: %.o
+		$(CC) $^ -o $@
+
+	#Dependences editions de liens
+	warcraft: warcraft.o video.o perso.o
+	editeur: editeur.o perso.o video.o
+
+	#Dependances
+	depends:
+		makedepend -Y *.c
+
+	#Clean
+	clean:
+		rm -f *.o warcraft editeur
+
+	#Installation
+	install:
+		mkdir -p $(PREFIX)$(DIR)
+		install -D -m 644 editeur $(PREFIX)$(DIR)
+		install -D -m 644 warcraft $(PREFIX)$(DIR)
+
+	#Désinstallation
+	uninstall:
+		rm -f $(PREFIX)$(DIR)editeur
+		rm -f $(PREFIX)$(DIR)warcraft
+
+	# DO NOT DELETE
+
+	editeur.o: perso.h video.h editeur.h
+	perso.o: perso.h video.h
+	video.o: video.h
+	warcraft.o: video.h perso.h warcraft.h
+
+
+doc/Makefile:
+
+	DIR = /usr/share/man/man6/
+
+	all:
+		pod2man --utf8 -r 0.1 -c "Game" -s 6 warcraft.pod > warcraft.6
+
+	#Clean
+	clean:
+		rm warcraft.6
+
+	#Installation
+	install:
+		mkdir -p $(PREFIX)$(DIR)
+		install -D -m 644 warcraft.6 $(PREFIX)$(DIR)
+
+	#Désinstallation
+	uninstall:
+		rm $(PREFIX)$(DIR)warcraft.6
+
+
+Pour aller plus loin:
+
+Ajouter une règle tgz permettant la génération d'une archive compressée des sources.
+
+Makefile:
+
+	export CC = gcc
+	export CFLAGS = -Wall
+	export LDFLAGS =
+	export PREFIX = /tmp/root
+	SRC = src/
+	DOC = doc/
+	ARCHIVE = src.tar.gz
+
+	.PHONY: all doc clean
+
+	all:
+		make -C $(SRC) $@
+		make -C $(DOC) $@
+
+	#Dependances
+	depends:
+		make depends -C $(SRC) $@
+
+	#Clean
+	clean:
+		make clean -C $(SRC) $@
+		make clean -C $(DOC) $@
+
+	#Installation
+	install:
+		make install -C $(SRC) $@
+		make install -C $(DOC) $@
+
+	#Désinstallation
+	uninstall:
+		make uninstall -C $(SRC) $@
+		make uninstall -C $(DOC) $@
+
+	#Compresser sources
+	tgz:
+		tar -zcvf $(ARCHIVE) $(SRC)
+
+	untgz:
+		tar -zxvf $(ARCHIVE)

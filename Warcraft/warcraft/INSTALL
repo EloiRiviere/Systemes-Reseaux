@@ -1,0 +1,22 @@
+Ci-dessous les étapes nécessaires à la compilation et à 
+l'installation du projet.
+
+1. Compilation
+
+make
+
+2. Installation
+
+make install
+
+3. Exécution
+
+warcraft : pour lancer le jeu.
+editeur : pour lancer l'éditeur.
+
+4. Documentation
+
+man warcraft 
+
+Pour plus d'informations, consultez http://...
+

@@ -1,0 +1,21 @@
+=encoding utf8
+
+=head1 NAME
+
+warcraft - warcraft game
+
+editeur - warcraft editor
+
+=head1 SYNOPSIS
+
+warcraft
+
+editeur 
+
+=head1 DESCRIPTION
+
+New B<warcraft> implementation.
+
+=head1 SEE ALSO
+
+L<intro(8)>
