@@ -438,8 +438,8 @@ src/Makefile:
 	#Installation
 	install:
 		mkdir -p $(PREFIX)$(DIR)
-		install -D -m 644 editeur $(PREFIX)$(DIR)
-		install -D -m 644 warcraft $(PREFIX)$(DIR)
+		install -D -m 755 editeur $(PREFIX)$(DIR)
+		install -D -m 755 warcraft $(PREFIX)$(DIR)
 
 	#Désinstallation
 	uninstall:
