@@ -1,0 +1,128 @@
+TP Systèmes virtuels:
+
+	Début du tp:
+
+	cd /home/scratch/gudavala/
+
+	ls
+	initrd.img-4.9.0-8-amd64  stretch.disk  vmlinuz-4.9.0-8-amd64
+
+	kvm -drive file=stretch.disk,snapshot=on -kernel vmlinuz-4.9.0-8-amd64 -initrd initrd.img-4.9.0-8-amd64 -append root=/dev/sda1 -redir tcp:5555:10.0.2.15:22
+
+	[login: root]
+	[password: iut]
+
+	loadkeys fr
+
+	mount -o remount,rw /
+
+	dhclient ens3
+
+	vi /etc/ssh/sshd_config
+
+		->	PermitRootLogin yes
+
+	systemctl restart ssh
+
+	_____________________
+
+	Nouveau terminal:
+
+		ssh -p 5555 -o NoHostAuthenticationForLocalhost=yes root@localhost
+
+
+	__________________________________________________________________________________
+
+
+Première partie : créer votre premier système virtuel
+	
+	cd /home/scratch/elriviere2/; dd of=debian.disk count=0 bs=1M seek=1000; ls -lh
+
+Comment vérifier que le fichier est creux ?
+	
+	ls -lh debian.disk
+
+recommencer:
+
+	kvm -drive file=stretch.disk,snapshot=on -drive file=/home/scratch/elriviere2/debian.disk -kernel vmlinuz-4.9.0-8-amd64 -initrd initrd.img-4.9.0-8-amd64 -append root=/dev/sda1 -redir tcp:5555:10.0.2.15:22
+
+	mount -o remount,rw /
+
+	dhclient ens3
+
+	vi /etc/ssh/sshd_config
+
+		->	PermitRootLogin yes
+	
+	systemctl restart ssh
+
+	_____________________
+
+	Nouveau terminal:
+
+		ssh -p 5555 -o NoHostAuthenticationForLocalhost=yes root@localhost
+
+		a] Partitionnement:
+
+			echo -e "n\np\n1\n\n\np\nw\n" | fdisk /dev/sdb
+
+		b] Formatage:
+
+			mke2fs -j /dev/sdb 														// sdb1 ?
+
+		c] Montage:
+
+			mkdir /tmp/d; mount /dev/sdb /tmp/d
+
+		d] Export:
+
+			export http_proxy="http://193.49.118.36:8080/"
+
+			_______________________________
+
+		e] Installer Debian:
+
+			debootstrap --include=linux-image-amd64,console-common,console-data,ssh stable /tmp/d
+
+			____
+
+			e2] [chroot]
+			____
+
+		f] Démonter:
+
+			umount /tmp/d
+
+			_______________________________
+
+		[chroot]
+
+		mount -o bind /proc /tmp/d/proc
+		mount -o bind /sys /tmp/d/sys
+		mount -o bind /dev /tmp/d/dev
+		mount -o bind /dev/pts /tmp/d/dev/pts
+
+		chroot /tmp/d
+
+		passwd														//iut
+
+		scp /boot/vmlinuz-4.9.0-8-amd64 elriviere2@10.0.2.2:/home/scratch/elriviere2
+
+		exit
+
+		umount /tmp/d/dev/pts
+		umount /tmp/d/dev
+		umount /tmp/d/sys
+		umount /tmp/d/proc
+		umount /tmp/d
+
+		poweroff
+
+
+		_________________________________
+
+		/etc/rc.local
+
+			#!/bin/sh
+
+			
